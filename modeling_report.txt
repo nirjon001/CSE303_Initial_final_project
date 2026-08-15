@@ -3,10 +3,11 @@ HEART DISEASE RISK (2026): PREDICTIVE MODELING - PROJECT REPORT
 Course: Statistics for Data Science (CSE303)
 ================================================================================
 
-This report explains the modeling part of the project (Part 2) in simple words:
-what each model does, how it works, and what the numbers in the notebook mean.
-The full code, plots and tables are in the companion Jupyter notebook:
-Heart_disease_Modeling_Group-7.ipynb (32 cells, runs without errors).
+This report explains the modeling part of the project (Part 8 of the merged
+notebook) in simple words: what each model does, how it works, and what the
+numbers in the notebook mean. The full code, plots and tables are in Part 8 of
+the merged notebook Heart_disease_Analysis_Group-7(Updated).ipynb (124 cells,
+runs without errors).
 
 The data is the same as Part 1: 9000 patients, 27 columns, no missing values,
 no duplicates. Target: has_heart_disease (1 = disease, 0 = no disease).
@@ -14,8 +15,9 @@ no duplicates. Target: has_heart_disease (1 = disease, 0 = no disease).
 --------------------------------------------------------------------------------
 1. WHAT WE ARE TRYING TO DO
 --------------------------------------------------------------------------------
-Part 1 described the data. Part 2 tries to PREDICT: can we learn patterns from
-the 9000 patients and use them to predict something about a new, unseen patient?
+Part 1 described the data. Part 8 (Predictive Modeling) tries to PREDICT: can we
+learn patterns from the 9000 patients and use them to predict something about a
+new, unseen patient?
 
 The assignment asks for two models:
   1. Linear Regression  -> predicts a continuous (number) value.
@@ -276,8 +278,9 @@ Random Forest) might catch up.
 5. The main caveat is class imbalance: always evaluate with F1 and ROC-AUC,
    never with accuracy alone, and remember the data is synthetic.
 
-This modeling part is complete, compared and discussed. It will be combined
-with the Part 1 exploratory notebook into the final project report.
+This modeling part is complete, compared and discussed. It is now included as
+Part 8 of the merged notebook Heart_disease_Analysis_Group-7(Updated).ipynb,
+right after the Part 1 exploratory analysis.
 
 ================================================================================
 END OF REPORT

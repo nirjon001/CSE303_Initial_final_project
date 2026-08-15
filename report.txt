@@ -9,7 +9,8 @@ Target variable: has_heart_disease (0 = no disease, 1 = disease)
                  No disease = 6273 (69.7%), Disease = 2727 (30.3%)
 
 The full analysis with every plot, table and code cell is in the companion
-Jupyter notebook: Heart_disease_merged.ipynb (92 cells, runs without errors).
+Jupyter notebook: Heart_disease_Analysis_Group-7(Updated).ipynb (124 cells,
+runs without errors).
 
 --------------------------------------------------------------------------------
 PART 1: DATASET DESCRIPTION
@@ -71,8 +72,8 @@ chart, plus the most common category and an imbalance comment.
 - sex and wearable_owner are nearly balanced, so group comparisons are fair.
 - chest_pain_type, exercise_induced_angina, family_history and smoker_status are
   imbalanced (one category dominates in each).
-- The target is imbalanced (30.3% positive). A predictive model built later must
-  handle this (class weights or careful evaluation metrics).
+- The target is imbalanced (30.3% positive). The predictive models in Part 8 must
+  handle this (evaluation with F1 / ROC-AUC rather than plain accuracy).
 
 --------------------------------------------------------------------------------
 PART 5: RELATIONSHIPS BETWEEN VARIABLES
@@ -164,7 +165,8 @@ PART 7: KEY INSIGHTS
     a worse cholesterol profile, higher blood pressure, higher BMI, higher blood
     sugar, lower exercise capacity, smoking and certain chest-pain types. The data
     is clean, so the patterns are trustworthy. This analysis is a solid starting
-    point for building a predictive model in the next stage of the course.
+    point, and the predictive modelling work is carried out in Part 8 of the same
+    notebook (see modeling_report.txt for the full modeling write-up).
 
 ================================================================================
 END OF REPORT
