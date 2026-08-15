@@ -1,0 +1,284 @@
+================================================================================
+HEART DISEASE RISK (2026): PREDICTIVE MODELING - PROJECT REPORT
+Course: Statistics for Data Science (CSE303)
+================================================================================
+
+This report explains the modeling part of the project (Part 2) in simple words:
+what each model does, how it works, and what the numbers in the notebook mean.
+The full code, plots and tables are in the companion Jupyter notebook:
+Heart_disease_Modeling_Group-7.ipynb (32 cells, runs without errors).
+
+The data is the same as Part 1: 9000 patients, 27 columns, no missing values,
+no duplicates. Target: has_heart_disease (1 = disease, 0 = no disease).
+
+--------------------------------------------------------------------------------
+1. WHAT WE ARE TRYING TO DO
+--------------------------------------------------------------------------------
+Part 1 described the data. Part 2 tries to PREDICT: can we learn patterns from
+the 9000 patients and use them to predict something about a new, unseen patient?
+
+The assignment asks for two models:
+  1. Linear Regression  -> predicts a continuous (number) value.
+  2. Logistic Regression -> predicts a category (disease or no disease).
+
+We also added four extra models (kNN, Decision Tree, Random Forest, Naive Bayes)
+to compare and to see if a different algorithm does better.
+
+The most important rule in modeling is that a model must be tested on data it
+has never seen. If we test on the same data the model learned from, it will look
+perfect but be useless on real patients. That is why we split the data.
+
+--------------------------------------------------------------------------------
+2. PREPARING THE DATA (so the models can use it)
+--------------------------------------------------------------------------------
+Models only understand numbers, not words, so we converted the text columns:
+  - sex, chest_pain_type, smoker_status -> turned into 0/1 dummy columns.
+    Example: sex_Male = 1 means Male, 0 means Female. One 0/1 column is enough
+    to store two groups. This is called "dummy coding".
+  - True/False columns (family history, etc.) -> became 0 (False) or 1 (True).
+  - patient_id was removed. It is just an ID number, not a real measurement.
+
+The result is a feature table of 28 columns for every patient. Then we split it:
+  - 80% training set (7200 patients): the model learns from this.
+  - 20% testing set (1800 patients): the model is judged on this (it never
+    saw it during training).
+
+For the classification models we also used stratify = y, which keeps the same
+percentage of disease patients (30.3%) in both sets. This is needed because the
+target is imbalanced (many more healthy than disease patients).
+
+--------------------------------------------------------------------------------
+3. LINEAR REGRESSION (a "number" prediction task)
+--------------------------------------------------------------------------------
+3.1 The idea
+Linear regression draws a straight line through the data:
+                     y = b0 + b1 * x
+b0 is the intercept (where the line starts) and b1 is the slope (how much y
+changes when x increases by 1). The model picks the line that makes the total
+error between the real values and the line as small as possible.
+
+3.2 What we predicted
+We predicted max_heart_rate_achieved (a continuous number) from age. This is a
+good choice because there is a well-known medical rule: maximum heart rate falls
+as we get older (roughly 220 minus age). Part 1 already showed a strong
+correlation (r = -0.73) between age and max heart rate.
+
+3.3 The result (simple model, age only)
+Fitted line: max_heart_rate = 229.64 - 1.20 * age
+Meaning: a newborn baby (age 0) would start near 229.6 bpm, and every extra
+year of age lowers the predicted max heart rate by about 1.2 bpm. This matches
+the real-world medical pattern.
+
+Testing set numbers:
+  MSE  = 216.43
+  RMSE = 14.71
+  R-squared = 0.524
+
+What these mean:
+  - MSE (Mean Squared Error): the average of (actual - predicted)^2. It is a
+    big number and hard to read directly.
+  - RMSE (Root Mean Squared Error): the square root of MSE. It is the average
+    error in the SAME units as the target (bpm). So our predictions are off by
+    about 14.7 bpm on average. Heart rate also depends on fitness, medication
+    and other things, so an error of ~15 bpm for a single-feature model seems
+    reasonable.
+  - R-squared: the share of variation in max heart rate that age explains.
+    0.524 means age alone explains 52% of the variation. The other 48% comes
+    from everything else or plain randomness. This is strong for one feature.
+
+3.4 Improving with more features
+A single feature can be limiting, so we also fit the regression with more
+predictors. We tried two versions:
+
+  Version A (6 features): age, bmi, resting_bp_systolic, hba1c,
+                          resting_heart_rate, sex_Male
+  Version B (ALL features): all 19 numerical features + all dummy columns
+                            (27 features in total).
+
+The results side by side:
+
+  Model                          MSE      RMSE    R-squared
+  ----------------------------  ------  -------  ----------
+  Simple (age only)             216.43    14.71    0.524
+  Multiple (6 features)         207.17    14.39    0.545
+  Multiple (all 27 features)    185.02    13.60    0.594
+
+The 6-feature version only helped a little, because age is so dominant. Using
+ALL features helped more: RMSE fell from 14.71 to 13.60 and R-squared rose from
+0.52 to 0.59. So the features we had left out (smoking, ST depression, exercise,
+chest pain) do carry useful information after all.
+
+3.5 Which features matter most (all-features model)
+Every feature gets a coefficient: how much max heart rate changes per unit of
+that feature, with everything else held fixed. The largest coefficients:
+
+  exercise_induced_angina          -5.40   (chest pain during exercise lowers
+                                            max heart rate a lot; the pain
+                                            stops the patient pushing hard)
+  chest_pain_type_Typical Angina   -3.38   (typical angina also linked to a
+                                            lower max heart rate)
+  smoker_status_Never              +2.05   (never-smokers reach higher max HR)
+  st_depression                   -1.81   (more ST depression, lower max HR)
+  sex_Male                        -1.51   (males a bit lower than females)
+  age                             -1.08   (older age, lower max HR)
+
+Features with coefficients near zero (daily_steps, triglycerides, fasting blood
+sugar, alcohol, cholesterol, resting blood pressure) add almost nothing once the
+other features are in the model. For example, alcohol has a coefficient of about
+0.02, meaning drinking more alcohol does not really change max heart rate.
+
+Note: in the all-features model we removed max_heart_rate_achieved from the
+feature list first, because it IS the thing we are predicting. Keeping it would
+have been cheating (the model would just copy the answer and give a fake perfect
+score). This is an important lesson about data leakage.
+
+--------------------------------------------------------------------------------
+4. LOGISTIC REGRESSION (a "category" prediction task)
+--------------------------------------------------------------------------------
+4.1 The idea
+Linear regression predicts a number. Logistic regression predicts a PROBABILITY
+between 0 and 1, which we then turn into a category:
+  - probability >= 0.5  -> predict disease
+  - probability < 0.5   -> predict no disease
+It fits an S-shaped curve instead of a straight line, so the output always stays
+between 0 and 1. The features are all the columns in the feature table (the same
+set as the classification split).
+
+Before fitting, we scaled the features (StandardScaler): every feature was
+adjusted to mean 0 and standard deviation 1. This is needed because a feature
+with big numbers (like daily_steps, in the thousands) would otherwise dominate
+features with small numbers (like hba1c, around 5.8). The scaling was learned
+from the TRAINING set only, so the test set stays "new".
+
+4.2 The results on the test set
+  Accuracy  = 0.8972
+  Precision = 0.8614
+  Recall    = 0.7872
+  F1 score  = 0.8226
+  ROC-AUC   = 0.9497
+
+Confusion matrix (1800 test patients):
+                       predicted no disease    predicted disease
+  actual no disease             1186                 69
+  actual disease                 116                429
+
+4.3 What every metric means
+  - Accuracy: the fraction of all patients classified correctly.
+    (1186 + 429) / 1800 = 89.7%. Looks great, but be careful: the target is
+    imbalanced. A lazy model that always predicts "no disease" would already be
+    ~70% correct, so accuracy alone can be misleading.
+  - Precision: when the model says "disease", how often is it right?
+    429 / (429 + 69) = 86.1%. It rarely gives a false alarm.
+  - Recall: of the patients who really have disease, how many does the model
+    catch? 429 / (429 + 116) = 78.7%. It catches 4 out of 5 real disease
+    patients.
+  - F1 score: the balanced average of precision and recall. This is the better
+    measure for an imbalanced problem. 0.82 is a strong score.
+  - ROC-AUC: if we randomly pick one disease patient and one healthy patient,
+    the model ranks the disease patient higher about 95% of the time. 0.95 is
+    far above 0.5 (random guessing), so the model separates the two groups very
+    well.
+
+The confusion matrix tells the story in detail:
+  - 1186 healthy patients correctly identified.
+  - 69 healthy patients wrongly flagged as disease (false alarms).
+  - 116 disease patients missed (the most dangerous error in medicine: we told
+    a sick person they are fine).
+  - 429 disease patients correctly found.
+
+--------------------------------------------------------------------------------
+5. ADDITIONAL MODELS (for comparison)
+--------------------------------------------------------------------------------
+We ran four more classifiers on the exact same training/testing sets, so the
+comparison is fair:
+
+  - k-Nearest Neighbors: looks at the 5 closest training patients and takes a
+    vote.
+  - Decision Tree: makes a series of if-then rules (if age > 60 then ...). We
+    limited it to depth 5 to avoid overfitting.
+  - Random Forest: builds 100 decision trees and averages their votes. Usually
+    more robust than a single tree.
+  - Naive Bayes: a simple probability model using Bayes' rule that assumes the
+    features are independent of each other.
+
+Results (same test set):
+
+  Model                Accuracy  Precision  Recall   F1 score
+  -------------------  --------  ---------  -------  --------
+  Logistic Regression    0.897     0.861    0.787    0.823
+  Random Forest          0.881     0.853    0.732    0.788
+  Naive Bayes            0.870     0.769    0.817    0.792
+  kNN                    0.855     0.860    0.622    0.722
+  Decision Tree          0.854     0.800    0.692    0.742
+
+Key observations:
+  - Logistic Regression is the best overall (F1 0.823, accuracy 0.897). The data
+    separates the groups in a "straight-line friendly" way (AUC 0.95), so the
+    simplest model wins over the more complex ones.
+  - Random Forest is second. It is more flexible, but the flexibility does not
+    help here and trees can overfit the noise.
+  - Naive Bayes has the highest recall (0.817): it is aggressive at calling
+    disease, so it misses the fewest sick patients, but at the cost of more
+    false alarms (precision 0.769).
+  - kNN and Decision Tree are the weakest. kNN is hurt because healthy patients
+    dominate the neighbourhoods, and the depth-5 tree is too simple.
+
+--------------------------------------------------------------------------------
+6. RESULTS AND DISCUSSION
+--------------------------------------------------------------------------------
+6.1 Are the results good?
+Yes, and the main reason is the data itself:
+  - The dataset is completely clean (no missing values, no duplicates, no
+    impossible values), so the models were never disturbed by dirty input.
+  - The strong predictors from Part 1 (max heart rate, ST depression, age,
+    cholesterol, blood pressure) separate the two groups clearly, which is why
+    the AUC is so high (0.95).
+  - The class imbalance (30.3% positive) did not hurt much because the signal is
+    so strong. It still matters for evaluation, which is why we used F1 and
+    ROC-AUC instead of accuracy alone.
+
+6.2 Limitations and honest warnings
+  - Class imbalance: a model that always says "no disease" would be ~70%
+    accurate while learning nothing. Never judge these models by accuracy alone.
+  - Synthetic data: this dataset was artificially generated on Kaggle. Real
+    clinical data is noisier, so the exact numbers here would probably not
+    transfer to real patients.
+  - The regression is approximate: an RMSE of ~13.6-14.7 bpm means our max
+    heart rate predictions can be off by about 14 bpm. Heart rate depends on
+    fitness and medication too, which are not in the data.
+  - False negatives: the logistic model still misses about 21% of real disease
+    patients (116 of 545 in the test set). Missing a sick patient is the most
+    dangerous medical error. A higher-recall model like Naive Bayes catches more,
+    but flags many more healthy people.
+
+6.3 How the data affected the results
+The clean, well-separated data is why every model performed well. Because the
+classes are nearly linearly separable, the simplest model (logistic regression)
+wins. If the data were noisier or more overlapping, the tree-based models (like
+Random Forest) might catch up.
+
+--------------------------------------------------------------------------------
+7. CONCLUSIONS
+--------------------------------------------------------------------------------
+1. Linear Regression predicted max heart rate from age (RMSE 14.71, R-squared
+   0.52 for age alone). The slope (-1.2 bpm per year of age) matches the
+   medical rule of thumb. Adding all features improved the model to RMSE 13.60
+   and R-squared 0.59.
+2. Logistic Regression classified patients into disease / no disease with
+   accuracy 0.897, F1 0.823 and ROC-AUC 0.950. Given the 30.3% positive rate,
+   these are strong and trustworthy numbers.
+3. The extra models (kNN, Decision Tree, Random Forest, Naive Bayes) confirmed
+   that Logistic Regression is the best choice for this dataset. None beat it
+   on F1 or accuracy.
+4. The modeling confirms the Part 1 clinical story: low max heart rate, high ST
+   depression, older age, worse cholesterol, smoking and certain chest-pain
+   types are the features that predict heart disease.
+5. The main caveat is class imbalance: always evaluate with F1 and ROC-AUC,
+   never with accuracy alone, and remember the data is synthetic.
+
+This modeling part is complete, compared and discussed. It will be combined
+with the Part 1 exploratory notebook into the final project report.
+
+================================================================================
+END OF REPORT
+================================================================================

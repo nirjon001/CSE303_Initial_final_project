@@ -1,0 +1,171 @@
+================================================================================
+HEART DISEASE RISK (2026): EXPLORATORY DATA ANALYSIS - PROJECT REPORT
+Course: Statistics for Data Science (CSE303)
+================================================================================
+
+Dataset: heart_disease_risk_2026.csv (Kaggle, synthetic data by srisyra02)
+Size: 9000 rows, 27 columns. No missing values, no duplicates.
+Target variable: has_heart_disease (0 = no disease, 1 = disease)
+                 No disease = 6273 (69.7%), Disease = 2727 (30.3%)
+
+The full analysis with every plot, table and code cell is in the companion
+Jupyter notebook: Heart_disease_merged.ipynb (92 cells, runs without errors).
+
+--------------------------------------------------------------------------------
+PART 1: DATASET DESCRIPTION
+--------------------------------------------------------------------------------
+The dataset is a synthetic (artificially generated) set of clinical measurements,
+lifestyle habits and activity data used to study heart-disease risk. The real-world
+problem it reflects: heart disease is a leading cause of death, and doctors judge a
+patient's risk from many factors together (blood pressure, cholesterol, age,
+lifestyle, and so on).
+
+All 27 features were described (meaning, data type, numerical vs categorical):
+- 19 numerical features: age, resting BP (systolic/diastolic), total cholesterol,
+  HDL, LDL, triglycerides, fasting blood sugar, HbA1c, BMI, resting heart rate,
+  max heart rate achieved, ST depression, alcohol per week, exercise minutes per
+  week, sleep hours, stress score, daily steps, diet quality score.
+- 7 categorical features: sex, chest pain type, exercise-induced angina,
+  family history, smoker status, wearable owner, and the target
+  has_heart_disease.
+
+--------------------------------------------------------------------------------
+PART 2: CENTRAL TENDENCY AND DISPERSION
+--------------------------------------------------------------------------------
+For every numerical feature we computed mean, median, mode, variance, standard
+deviation, Q1, Q3 and IQR. Highlights:
+
+- Age: mean ~54, median ~54, IQR 45-63, std ~13. Symmetric, realistic adult range.
+- Blood pressure: systolic ~128 mmHg, diastolic ~81 mmHg. On the borderline between
+  normal and elevated.
+- Total cholesterol: mean ~189 mg/dL, std ~32. Values above 200 are high, so part
+  of the sample is at risk.
+- BMI: mean ~25.3. Just over the healthy-weight boundary (25-30 is overweight).
+- Right-skewed (mean > median): st_depression (1.01 vs 0.70), alcohol per week
+  (5.71 vs 4.20), daily_steps (the most variable feature, largest IQR ~2975).
+- Near-symmetric: stress_score (48.0 vs 48.1), sleep_hours (7.0 vs 7.0).
+- Interesting modes: exercise_minutes_per_week mode = 0 (many record no exercise),
+  triglycerides mode = 35 while the mean is 152 (big low-value group).
+- The target is imbalanced: 6273 zeros vs 2727 ones (30.3% positive).
+
+--------------------------------------------------------------------------------
+PART 3: DISTRIBUTION AND SHAPE
+--------------------------------------------------------------------------------
+Each numerical feature got a 1x3 plot (histogram + density curve, boxplot) with
+mean/median lines and the skewness value, plus an IQR outlier check.
+
+- Shape rule used: |skew| < 0.5 -> Symmetric; skew > +0.5 -> Right-skewed;
+  skew < -0.5 -> Left-skewed. Mean and median noted to agree with the shape.
+- Result: 17 of 19 features are symmetric. Only two are clearly right-skewed:
+  - st_depression: skew ~2.04, 5.4% outliers (the most of any feature).
+  - alcohol_units_per_week: skew ~2.03, 4.8% outliers.
+- The zero-spikes (exercise_minutes_per_week, daily_steps mode = 500) capture
+  extreme patient behaviour and are the most interesting for later prediction.
+
+--------------------------------------------------------------------------------
+PART 4: CATEGORICAL VARIABLE ANALYSIS
+--------------------------------------------------------------------------------
+Each categorical feature got a frequency table (count + %), a bar chart and a pie
+chart, plus the most common category and an imbalance comment.
+
+- sex and wearable_owner are nearly balanced, so group comparisons are fair.
+- chest_pain_type, exercise_induced_angina, family_history and smoker_status are
+  imbalanced (one category dominates in each).
+- The target is imbalanced (30.3% positive). A predictive model built later must
+  handle this (class weights or careful evaluation metrics).
+
+--------------------------------------------------------------------------------
+PART 5: RELATIONSHIPS BETWEEN VARIABLES
+--------------------------------------------------------------------------------
+Scatterplots for numerical pairs (colored by disease) and boxplots/countplots for
+numeric-or-categorical vs the binary target. Pearson r reported for every pair.
+
+- Age vs total cholesterol: r = 0.128 (weak). Disease patients are older (59.7 vs
+  51.5) and have slightly higher cholesterol (197 vs 185 mg/dL).
+- Age vs cholesterol split by sex: males have higher disease rate (35.4% vs 24.7%).
+- HDL vs LDL: r = -0.082 (independent). Disease group has lower HDL (50.5 vs 57.3)
+  and higher LDL (114.4 vs 98.5).
+- Age vs BMI split by sex: r = 0.039 (independent).
+- BMI vs disease: mean 26.7 vs 24.7, r = 0.213.
+- Chest pain type vs disease: Typical Angina highest (47.9%), Asymptomatic lowest
+  (25.4%).
+- Fasting blood sugar vs disease: 126.5 vs 116.4, r = 0.202.
+- Family history vs disease: 35.6% with history vs 28.3% without.
+- Resting BP vs disease: systolic r = 0.249, diastolic r = 0.193.
+- Smoking & alcohol vs disease: current smokers 46.4% disease rate; alcohol
+  correlation only 0.041 (weak).
+
+Correlation strength table used: 0.00-0.20 very weak, 0.20-0.40 weak, 0.40-0.60
+moderate, 0.60-0.80 strong, 0.80-1.00 very strong.
+
+Strongest correlations with the target: max_heart_rate_achieved (-0.581),
+st_depression (+0.357), age (+0.291), ldl (+0.267), hdl (-0.252),
+resting_bp_systolic (+0.249).
+
+A full 20x20 correlation matrix (all 19 numerical features + the target) is
+drawn as a heatmap in section 5.12. It confirms the same strongest features and
+also shows feature-to-feature relationships: systolic and diastolic BP are
+strongly correlated, HDL is negatively correlated with triglycerides, and the
+cholesterol features (total cholesterol, LDL, HDL, triglycerides) form a cluster.
+
+--------------------------------------------------------------------------------
+PART 6: DATA QUALITY ASSESSMENT
+--------------------------------------------------------------------------------
+Five checks were run:
+
+1. Missing values: 0 in every column. Nothing to impute.
+2. Duplicate rows: 0. No patient is counted twice.
+3. Min/max of every numerical column: all values plausible, no negatives.
+4. Sensible-range bounds check (clinical ranges): every value inside its range.
+5. Categorical unexpected-categories check: only the expected categories.
+
+Discussion of handling (if problems existed): drop missing rows or impute with
+mean/median/mode; drop duplicates; fix or remove impossible values. The Part 3
+IQR outliers (high ST-depression, obesity, heavy drinking) are extreme but real
+patients and are kept, not removed.
+
+Conclusion: the dataset is completely clean. No preprocessing is needed.
+
+--------------------------------------------------------------------------------
+PART 7: KEY INSIGHTS
+--------------------------------------------------------------------------------
+7.1 Typical patient profile of heart disease (with disease vs without):
+    Age 59.7 vs 51.5 years (older)
+    Systolic BP 133.1 vs 125.6 mmHg (higher)
+    Diastolic BP 84.0 vs 79.4 mmHg (higher)
+    LDL 114.4 vs 98.5 mg/dL (higher)
+    HDL 50.5 vs 57.3 mg/dL (lower)
+    BMI 26.7 vs 24.7 (higher)
+    Fasting blood sugar 126.5 vs 116.4 mg/dL (higher)
+
+7.2 Strongest single signals:
+    - max_heart_rate_achieved (r = -0.58): by far the most informative. Disease
+      patients reach a much lower max heart rate during exercise.
+    - st_depression (r = +0.36): classic ECG sign of heart disease.
+    - age (r = +0.29), LDL (r = +0.27), HDL (r = -0.25), systolic BP (r = +0.25).
+
+7.3 Categorical / lifestyle insights:
+    - Typical Angina: 47.9% disease rate (vs Asymptomatic 25.4%).
+    - Current smokers: 46.4% (vs never 25.2%).
+    - Family history: 35.6% (vs 28.3% without).
+    - Male: 35.4% vs Female: 24.7%.
+    - Alcohol: weak (r ~ 0.04), far less important than smoking here.
+
+7.4 Keep for future modeling: max_heart_rate_achieved, st_depression, age, ldl,
+    hdl, resting_bp_systolic, exercise_minutes_per_week, hba1c, bmi,
+    fasting_blood_sugar, plus categorical chest_pain_type, smoker_status,
+    family_history, sex.
+    Weakest: alcohol_units_per_week, sleep_hours, stress_score, triglycerides.
+    Warning: the target is imbalanced (30.3% positive); a model predicting "no
+    disease" always would be ~70% "accurate" while learning nothing, so use
+    precision/recall or balanced metrics, not plain accuracy.
+
+7.5 Final conclusion: heart disease in this dataset goes together with older age,
+    a worse cholesterol profile, higher blood pressure, higher BMI, higher blood
+    sugar, lower exercise capacity, smoking and certain chest-pain types. The data
+    is clean, so the patterns are trustworthy. This analysis is a solid starting
+    point for building a predictive model in the next stage of the course.
+
+================================================================================
+END OF REPORT
+================================================================================
