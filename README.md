@@ -36,7 +36,9 @@ Heart Disease Risk 2026 dataset (Kaggle, synthetic data by srisyra02): 9000 pati
 
 ## How to run
 
-1. Install dependencies: `pip install pandas numpy matplotlib seaborn scipy scikit-learn jupyter nbconvert nbclient ipykernel`.
+### On your own machine (with admin rights)
+
+1. Install dependencies: `pip install -r requirements.txt`
 2. Open `Heart_disease_Analysis_Group-7(Updated).ipynb` in Jupyter / VSCode.
 3. Make sure `heart_disease_risk_2026.csv` is in the same folder as the notebook.
 4. Select the `cse303` kernel and run all cells.
@@ -46,6 +48,30 @@ To verify the whole notebook headlessly:
 ```powershell
 python -m jupyter nbconvert --to notebook --execute "Heart_disease_Analysis_Group-7(Updated).ipynb" --output executed.ipynb --ExecutePreprocessor.timeout=600
 ```
+
+### On a lab PC with NO admin rights (Python 3.10-3.14 already installed, internet works)
+
+1. Copy the whole folder (notebook + CSV + requirements.txt) onto the lab PC.
+2. Open a terminal and run:
+
+   ```powershell
+   python -m pip install --user -r requirements.txt
+   ```
+
+   The `--user` flag installs into **your account only** - no admin password needed,
+   and the lab Python is never touched.
+
+3. In VSCode pick the **system Python** (the one on `PATH`) as the kernel - not a venv.
+4. Run the notebook.
+
+Notes:
+- If a lab Python is older (e.g. 3.10), `pip` automatically installs slightly older
+  package versions that still work - the notebook only uses basic features.
+- **Fallback:** the notebook already has all plots and outputs saved inline (0 error
+  cells), so it opens and displays fully even before you run anything - you can always
+  present it, and use the terminal only if asked to re-run a cell.
+- `requirements-locked.txt` holds the exact versions tested for this project, for
+  machines where you want perfectly reproducible results (e.g. your own PC).
 
 ## Disclaimer
 
