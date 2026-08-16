@@ -1,8 +1,13 @@
 # Heart Disease Risk (2026): Exploratory Data Analysis and Predictive Modeling
 
-Course project for **Statistics for Data Science (CSE303)**. A complete analysis of the
-Heart Disease Risk 2026 dataset (Kaggle, synthetic data by srisyra02): 9000 patients,
-27 columns, no missing values, no duplicates.
+**Course:** Statistics for Data Science (CSE303) · **Status:** ✅ Complete
+
+A complete data-science project on the Heart Disease Risk 2026 dataset (Kaggle, synthetic
+data by srisyra02): **9000 patients, 27 columns**, no missing values, no duplicates. The
+project covers the full workflow — from describing the data, through every exploratory
+technique, to building and comparing predictive models.
+
+> This project was completed and received positive feedback from the instructor.
 
 ## Contents
 
@@ -13,6 +18,8 @@ Heart Disease Risk 2026 dataset (Kaggle, synthetic data by srisyra02): 9000 pati
 | `report.txt` | Text report for Parts 1-7 (exploratory data analysis) |
 | `modeling_report.txt` | Text report for Part 8 (predictive modeling) |
 | `Heart Disease 2026 -Final_Report_Group7.docx` / `.pdf` | Final project report |
+| `requirements.txt` | Dependencies (flexible versions, works on any lab PC) |
+| `requirements-locked.txt` | Exact tested dependency versions |
 
 ## Project parts
 
@@ -23,7 +30,7 @@ Heart Disease Risk 2026 dataset (Kaggle, synthetic data by srisyra02): 9000 pati
 5. **Relationships Between Variables** — scatterplots, boxplots, Pearson correlations, 20x20 correlation matrix.
 6. **Data Quality Assessment** — missing values, duplicates, unusual and impossible values.
 7. **Key Insights** — patient risk profile and the strongest predictors.
-8. **Predictive Modeling** — Linear Regression (manual + sklearn comparison), Logistic Regression, kNN, Decision Tree, Random Forest, Naive Bayes.
+8. **Predictive Modeling** — Linear Regression (manual normal-equation + sklearn comparison), Logistic Regression, kNN, Decision Tree, Random Forest, Naive Bayes.
 
 ## Key findings
 
@@ -31,6 +38,7 @@ Heart Disease Risk 2026 dataset (Kaggle, synthetic data by srisyra02): 9000 pati
 - Strongest predictors: `max_heart_rate_achieved` (r = -0.58), `st_depression` (r = +0.36),
   `age`, `ldl`, `hdl`, `resting_bp_systolic`.
 - Data is completely clean; no preprocessing needed.
+- Manual normal-equation linear regression matches sklearn exactly (R² 0.524, age only).
 - Logistic Regression is the best classifier (accuracy 0.897, F1 0.823, ROC-AUC 0.950);
   the data is nearly linearly separable, so simpler models win.
 
