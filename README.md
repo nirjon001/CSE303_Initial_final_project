@@ -61,8 +61,19 @@ python -m jupyter nbconvert --to notebook --execute "Heart_disease_Analysis_Grou
    The `--user` flag installs into **your account only** - no admin password needed,
    and the lab Python is never touched.
 
-3. In VSCode pick the **system Python** (the one on `PATH`) as the kernel - not a venv.
-4. Run the notebook.
+3. Select the **system Python** as the kernel in VSCode (this is important - on the lab
+   PC the packages live in your user folder, not in a venv, so the kernel must be the
+   system Python that `pip` installed into):
+   - Open the notebook in VSCode.
+   - Click the kernel name in the top-right corner of the notebook editor (it may
+     currently say something like `Python 3.x` or a venv name).
+   - In the menu that opens, choose **"Select Another Kernel"** (or **"Python
+     Environments"**).
+   - Pick the option that shows your system Python - usually labelled like `Python 3.x
+     64-bit` (and `('Python 3.14')` or similar) with a path like `C:\Users\...\Python\Python3xx`.
+   - Do **not** pick any entry that says `venv` or `.venv` (those are empty on the lab PC).
+   - If it is already showing a plain `Python 3.x`, you are fine - no change needed.
+4. Run the notebook (Run All, or use the keyboard shortcut).
 
 Notes:
 - If a lab Python is older (e.g. 3.10), `pip` automatically installs slightly older
